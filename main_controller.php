@@ -1,6 +1,7 @@
 <?php
 // Get our helper functions
 require_once("functions.php");
+require_once("connect_to_mysql.php");
 // Set variables for our request
 $api_key = "1ad16161f1d79d041faa271898ce163f";
 $shared_secret = "f27efe0cdd9245fef7c4bc408280a585";
@@ -31,9 +32,18 @@ if (hash_equals($hmac, $computed_hmac)) {
 	$result = json_decode($result, true);
 	$access_token = $result['access_token'];
 	// Show the access token (don't do this in production!)
-	echo $access_token;
+	//echo $access_token;
+	$sql = "INSERT INTO table_token (store_url, access_token, install_date)
+		VALUES ('".$params['shop']."', '".$access_token."', NOW())";
+
+if (mysqli_query($conn, $sql)) {
+	header('Location: https://'.$params['shop'].'/admin/apps');
+	die();
+} else {
+	echo "Error inserting new record: " . mysqli_error($conn);
+}
+
 } else {
 	// Someone is trying to be shady!
 	die('This request is NOT from Shopify!');
 }
-
